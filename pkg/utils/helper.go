@@ -18,7 +18,7 @@ func GenerateUID() int {
 }
 
 // GenerateRandomChinese 根据ASCII码生成随机汉字组合
-func GenerateRandomChinese(length int) string {
+func GenerateRandomChinese() string {
 	str := "汉皇重色思倾国御宇多年求不得杨家有女初长成养在深闺人未识天生丽质难自弃一朝选在君王侧回眸一笑百媚生六宫粉黛无颜色" +
 		"春寒赐浴华清池温泉水滑洗凝脂侍儿扶起娇无力" +
 		"始是新承恩泽时云鬓花颜金步摇芙蓉帐暖度春宵春宵苦短日高起从此君王不早朝" +
@@ -42,7 +42,16 @@ func GenerateRandomChinese(length int) string {
 		"连理枝天长地久有时尽此恨绵绵无绝期"
 
 	rand.Seed(time.Now().UnixNano())
+
 	runes := []rune(str)
-	name := string(runes[rand.Intn(len(runes)-1)]) + string(runes[rand.Intn(len(runes)-1)])
+
+	rint := rand.Intn(4)
+	if rint == 0 {
+		rint = 2
+	}
+	name := ""
+	for i := 0; i < rint; i++ {
+		name += string(runes[rand.Intn(len(runes)-1)])
+	}
 	return name
 }

@@ -49,9 +49,5 @@ paths:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              result:
-                type: string
-                example: "world"
+            type: string
   

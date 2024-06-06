@@ -17,7 +17,7 @@ func NewUser(MemberID string) *User {
 	return &User{
 		MemberID: MemberID,
 		Uid:      utils.GenerateUID(),
-		Nickname: utils.GenerateRandomChinese(2),
+		Nickname: utils.GenerateRandomChinese(),
 		Level:    1,
 		Rank:     1,
 		HP:       100,
