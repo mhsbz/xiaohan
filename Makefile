@@ -16,3 +16,7 @@ gen-openapi-server:
 .PHONY: tidy
 tidy:
 	go mod tidy
+
+.PHONY: run_mongo
+run_mongo:
+	docker run -d -p 27017:27017 --name xiaohan_mongo mongo:4.4.6
