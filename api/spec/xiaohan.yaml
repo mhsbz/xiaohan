@@ -1,0 +1,57 @@
+swagger: "2.0"
+info:
+  title: XiaohanService
+  description: xiao han services
+  version: 1.0.0
+
+host: localhost:8080
+basePath: /xiaohan/v1
+schemes:
+  - http
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Health check
+      operationId: health
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: OK
+  /action:
+    get:
+      summary: Action
+      description: Action
+      operationId: action
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: member_id
+          description: Member ID
+          required: true
+          type: string
+
+        - in: query
+          name: action
+          description: Action
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+                example: "world"
+  
