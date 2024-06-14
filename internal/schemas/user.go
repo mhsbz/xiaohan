@@ -11,6 +11,8 @@ type User struct {
 	HP       int    `json:"hp"`
 	MP       int    `json:"mp"`
 	Power    int    `json:"power"`
+	XStatus  bool   `json:"x_status"`
+	MM       string `json:"mM"`
 }
 
 func NewUser(MemberID string) *User {
@@ -18,6 +20,7 @@ func NewUser(MemberID string) *User {
 		MemberID: MemberID,
 		Uid:      utils.GenerateUID(),
 		Nickname: utils.GenerateRandomChinese(),
+		MM:       utils.GenerateRandomChinese(),
 		Level:    1,
 		Rank:     1,
 		HP:       100,

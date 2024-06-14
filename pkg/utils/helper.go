@@ -1,5 +1,6 @@
 package utils
 
+// 公共方法
 import (
 	"math/rand"
 	"time"
