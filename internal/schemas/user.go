@@ -1,5 +1,6 @@
 package schemas
 
+//本文档为属性定义值，用户数据设定
 import "github.com/mhsbz/xiaohan/pkg/utils"
 
 type User struct {

@@ -1,6 +1,6 @@
 package utils
 
-// 公共方法
+// 本文档为运行逻辑程序
 import (
 	"math/rand"
 	"time"
