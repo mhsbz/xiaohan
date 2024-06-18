@@ -6,18 +6,6 @@ import (
 	"time"
 )
 
-// GenerateUID 生成一个唯一的整数UID
-func GenerateUID() int {
-	// 设置随机数种子
-	rand.Seed(time.Now().UnixNano())
-
-	// 生成一个随机整数
-	uid := rand.Intn(100000000)
-
-	// 返回生成的UID
-	return uid
-}
-
 // GenerateRandomChinese 根据ASCII码生成随机汉字组合
 func GenerateRandomChinese() string {
 	str := "汉皇重色思倾国御宇多年求不得杨家有女初长成养在深闺人未识天生丽质难自弃一朝选在君王侧回眸一笑百媚生六宫粉黛无颜色" +
