@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-func main() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 type Service struct {
 	IUser     IUserLogic
 	dataStore *repository.MongoClient
