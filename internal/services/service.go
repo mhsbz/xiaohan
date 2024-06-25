@@ -108,7 +108,7 @@ func specialEvent() string {
 	case randNum <= 0.3: // 30%概率空手而返
 		return "走到迷宫的尽头，空手而返。"
 	case randNum <= 0.5: // 20%概率进入神秘的机关道
-		return "进入神秘的机关道，获得一个神秘宝箱。"
+		return "进入神秘的机关道，获得一个【神秘宝箱】。"
 	case randNum <= 0.7: // 20%概率发现前人遗留的尸骨
 		return "发现了前人遗留的尸骨，一个包我品三遍，每次都有新发现，获得了【前人的尸骨-绿】。"
 	default: // 剩余30%概率发现传送门
@@ -305,10 +305,16 @@ func (s *Service) enterDungeon(params operations.ActionParams) middleware.Respon
 		if rand.Float64() <= monster.DropRate {
 			dropItem := "未知物品"
 			switch monster.Name {
-			case "哥布林战士", "哥布林弓箭手":
+			case "哥布林战士":
 				dropItem = "装备1"
 			case "哥布林巫师":
 				dropItem = "道具1"
+			case "哥布林弓箭手":
+				if rand.Intn(2) == 0 {
+					dropItem = "道具1"
+				} else {
+					dropItem = "装备1"
+				}
 			case "哥布林头目":
 				dropItem = "稀有物品"
 			}
@@ -320,18 +326,18 @@ func (s *Service) enterDungeon(params operations.ActionParams) middleware.Respon
 	eventOutcome := specialEvent()
 
 	// 结算信息
-	responseStr := fmt.Sprintf("在第%d层迷宫，您击杀了:\n", floor)
+	responseStr := fmt.Sprintf("在第%d层迷宫，您击杀了:", floor)
 	for monster, count := range killedMonsters {
-		responseStr += fmt.Sprintf("- %d只%s\n", count, monster)
+		responseStr += fmt.Sprintf("%d只%s，", count, monster)
 	}
 	if len(drops) > 0 {
-		responseStr += "掉落物品：\n" + strings.Join(drops, "\n") + "\n"
+		responseStr += "掉落物品：" + strings.Join(drops, "") + "，"
 	}
 	responseStr += eventOutcome
 
-	// 终点判定的交互逻辑
+	// 如果到下一关终点额外发送询问
 	if strings.Contains(eventOutcome, "解锁下一层") {
-		responseStr += "\n是否直接探索下一层？(是/否)"
+		responseStr += "是否直接探索下一层？(是/否)"
 	}
 	return operations.NewActionOK().WithPayload(responseStr)
 }
