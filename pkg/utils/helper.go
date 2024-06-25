@@ -44,3 +44,12 @@ func GenerateRandomChinese() string {
 	}
 	return name
 }
+
+func InArray(str string, arr []string) bool {
+	for _, s := range arr {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
