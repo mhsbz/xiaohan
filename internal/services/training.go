@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-type ITrainingLogic interface {
-	Training() string
-}
-
 type TrainingService struct{}
 
 type TrainingOption struct {

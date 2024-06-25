@@ -1,8 +1,5 @@
 package services
 
-type IDungeonLogic interface {
-	EnterDungeon() string
-}
 type DungeonService struct{}
 
 // 新增处理迷宫功能的函数

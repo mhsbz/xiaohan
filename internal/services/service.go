@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/mhsbz/xiaohan/api/gen/xiaohan/server/operations"
-	"github.com/mhsbz/xiaohan/internal/repository"
 	"github.com/mhsbz/xiaohan/internal/schemas"
 	"github.com/mhsbz/xiaohan/pkg/utils"
 	"math/rand"
@@ -14,14 +13,15 @@ import (
 )
 
 type Service struct {
-	IUser     IUserLogic
-	dataStore *repository.MongoClient
-	ITraining ITrainingLogic
-	IMenu     IMenuLogic
-	IDungeon  IDungeonLogic
-	a         string
-	b         string
-	c         string
+	IUser        *UserService
+	ITraining    *TrainingService
+	IMenu        *MenuService
+	IDungeon     *DungeonService
+	IFight       *FightService
+	IDescription *DescriptionService
+	a            string
+	b            string
+	c            string
 }
 
 // 签到奖励选项
@@ -102,11 +102,15 @@ func SpecialEvent() string {
 
 func NewService() *Service {
 	return &Service{
-		ITraining: &TrainingService{},
-		IUser:     &UserService{},
-		IMenu:     &MenuService{},
-		IDungeon:  &DungeonService{},
-		dataStore: repository.NewMongoClient(),
+		IUser:        &UserService{},
+		ITraining:    &TrainingService{},
+		IMenu:        &MenuService{},
+		IDungeon:     &DungeonService{},
+		IFight:       &FightService{},
+		IDescription: &DescriptionService{},
+		a:            "",
+		b:            "",
+		c:            "",
 	}
 }
 
@@ -150,9 +154,7 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 	case action == "个人信息":
 		responseStr = "\n地区：\n职业：\n名称：\n战力：\n等级： \npower/修为：\n力量/真气：\n敏捷/灵气：\n防御/元气：\n武器：\n防具：\n项链/护符： \n心法： \n技能列表：\n \n \n金币: \n店铺id："
 	case action == "战斗相关":
-		responseStr = "本文档为法系和物理系的对战系统注释\n\n"
-		responseStr += "术修，法师的攻击方式为技能攻击，优先默认释放1号主技能，后续按排序释放2，3号技能，绝技/奥义技每场战斗不限次数，消耗一定百分比蓝量之后下回合判定释放，需要消耗非常庞大的蓝量若蓝量不足则回到默认施法顺序，当蓝条不足以支撑任何技能释放的时候，将进行普通攻击\n\n"
-		responseStr += "剑修，剑士的攻击方式为平a攻击，攻击成功的情况下生成一点能量，每受到10%最大生命值伤害也会生成一点能量，回合开始当能量足够释放技能的情况下1＞2＞3的顺序轮次进行释放，绝技/觉醒技每场战斗限一次，累积生成共计10点以上能量之后，回合开始必定释放，不消耗能量"
+		responseStr = s.IDescription.FightDescription()
 	case action == "签到":
 		// 生成一个0到1之间的随机数
 		randomNum := rand.Float64()
