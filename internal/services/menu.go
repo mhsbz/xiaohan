@@ -1,9 +1,5 @@
 package services
 
-type IMenuLogic interface {
-	MenuList() string
-}
-
 type MenuService struct{}
 
 func (s *MenuService) MenuList() string {

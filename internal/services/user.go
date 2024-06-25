@@ -2,9 +2,6 @@ package services
 
 import "github.com/mhsbz/xiaohan/internal/schemas"
 
-type IUserLogic interface {
-	CreateOrGetUser(memberID string) (*schemas.User, error)
-}
 type UserService struct{}
 
 var rank = 0
