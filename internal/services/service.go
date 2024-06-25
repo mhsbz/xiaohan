@@ -182,7 +182,7 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 		} else {
 			responseStr = "签到失败，请稍后再试。"
 		}
-	case utils.InArray(action, []string{"领取内测专属奖励"}):
+	case utils.InArray(action, []string{"领取内测专属奖励", "内测奖励", "领取内测奖励"}):
 		responseStr = "恭喜道友获得由453411753内测群发出的内测专属奖励，内测专属称号：AU仙人，持有效果：幸运值+1"
 	case action == "闭关":
 		var cultivationLocation string
