@@ -19,10 +19,10 @@ type User struct {
 	Power    int    `json:"power"`
 	XStatus  bool   `json:"x_status"`
 	Meridian string `json:"meridian"`
+	Location string `json:"location"`
 }
 
 func NewUser(MemberID string) *User {
-
 	return &User{
 		MemberID: MemberID,
 		Uid:      int(time.Now().UnixNano()),
@@ -33,5 +33,7 @@ func NewUser(MemberID string) *User {
 		HP:       100,
 		MP:       100,
 		Power:    0,
+		XStatus:  false,
+		Location: "AU",
 	}
 }
