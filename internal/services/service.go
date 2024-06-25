@@ -9,6 +9,8 @@ import (
 	"github.com/mhsbz/xiaohan/internal/schemas"
 	"github.com/mhsbz/xiaohan/pkg/utils"
 	"math/rand"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -63,10 +65,10 @@ type Monster struct {
 }
 
 var monsters = []Monster{
-	{Name: "哥布林战士", Level: 1, MeetProb: 0.4, DropRate: 0.1},  // 40%
-	{Name: "哥布林巫师", Level: 2, MeetProb: 0.3, DropRate: 0.1},  // 30%
-	{Name: "哥布林弓箭手", Level: 3, MeetProb: 0.2, DropRate: 0.1}, // 20%
-	{Name: "哥布林头目", Level: 4, MeetProb: 0.1, DropRate: 0.05}, // 10%
+	{Name: "哥布林战士", Level: 1, MeetProb: 0.4, DropRate: 0.2},  // 40%
+	{Name: "哥布林巫师", Level: 2, MeetProb: 0.3, DropRate: 0.2},  // 30%
+	{Name: "哥布林弓箭手", Level: 3, MeetProb: 0.2, DropRate: 0.2}, // 20%
+	{Name: "哥布林头目", Level: 4, MeetProb: 0.1, DropRate: 0.1},  // 10%
 }
 
 func findMonsterByName(monsters []Monster, name string) Monster {
@@ -103,14 +105,30 @@ func specialEvent() string {
 	randNum := rand.Float64()
 	switch {
 	case randNum <= 0.3: // 30%概率空手而返
-		return "走到迷宫的尽头，空手而返。"
+		return "\n- 迷宫结算：走到迷宫的尽头，空手而返。"
 	case randNum <= 0.5: // 20%概率进入神秘的机关道
-		return "进入神秘的机关道，获得一个【神秘宝箱】。"
+		return "\n- 特殊事件：进入神秘的机关道，获得一个【神秘宝箱】。"
 	case randNum <= 0.7: // 20%概率发现前人遗留的尸骨
-		return "发现了前人遗留的尸骨，一个包我品三遍，每次都有新发现，获得了【前人的尸骨-绿】。"
+		return "\n- 特殊事件：发现了前人遗留的尸骨，一个包我品三遍，每次都有新发现，获得了【前人的尸骨-绿】。"
 	default: // 剩余30%概率发现传送门
-		return "发现了进入深层迷宫的传送门入口，解锁下一层！"
+		return "\n- 迷宫结算：发现了进入深层迷宫的传送门入口，解锁下一层！"
 	}
+}
+
+// 任务数据结构
+type Quest struct {
+	ID          int
+	Title       string
+	Description string
+	Objective   string
+	Reward      string
+}
+
+// 可接受任务列表
+var availableQuests = []Quest{
+	{ID: 1, Title: "解救被困的人族圣女", Description: "深入敌后，救出被囚禁的人族圣女。", Objective: "解救圣女", Reward: "10000金币,获得圣女的青睐"},
+	{ID: 2, Title: "击杀10只哥布林", Description: "清理附近的哥布林威胁，保护村庄的安全。", Objective: "击杀10只哥布林", Reward: "500金币, 哥布林耳朵x10"},
+	{ID: 3, Title: "击杀哥布林头目3只", Description: "消灭哥布林的领导层，削弱它们的组织力量。", Objective: "击杀3只哥布林头目", Reward: "1000金币, 稀有装备箱x1"},
 }
 
 func NewService() *Service {
@@ -125,6 +143,17 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 	action := strings.TrimSpace(params.Action)
 
 	switch {
+	case action == "菜单":
+		responseStr = "蓝字快捷正在申请中，暂时使用文本菜单\n\n"
+		responseStr += "修炼： 修炼  闭关  进入迷宫  双修/补魔\n"
+		responseStr += "战斗： 副本  切磋  登仙台  生死对决 \n"
+		responseStr += "战斗： 炼金  炼药  异火  技能配置  \n"
+		responseStr += "信息： 命脉更换  名称更换  个人信息  背包  仓储  状态\n"
+		responseStr += "任务： 当前主线  已接取任务  日常任务 \n"
+		responseStr += "交易： 店铺  云游商人  拍卖行  赠送金币\n"
+		responseStr += "休闲： 赌场  挖矿 \n"
+		responseStr += "帮助： 战斗相关  属性相关  道具表  装备表  命脉表  技能表\n\n"
+		responseStr += "目前可用的功能：修炼 闭关 进入迷宫"
 
 	case action == "":
 		responseStr = "当你召唤我的时候，你的路就只有一条，加入赛博修仙界,输入“加入异世界修仙”进入游戏"
@@ -156,16 +185,17 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 		initialMeridian := generateMeridian()
 		responseStr = fmt.Sprintf("创建角色成功，您是第%d位进入AU界的玩家，您的角色名称为%s，是%s的%s，诞生于公元%s年，你从母亲怀中降生之日，AU大陆的光芒赐福于您，获得了初始命脉：%s，输入菜单进入游戏主界面",
 			newUser.Uid, newUser.Nickname, s.a, combineBCValue(s.b, s.c), time.Now().Format("2006"), initialMeridian)
+	case action == "个人信息":
+		responseStr = "\n地区：\n职业：\n名称：\n战力：\n等级： \npower/修为：\n力量/真气：\n敏捷/灵气：\n防御/元气：\n武器：\n防具：\n项链/护符： \n心法： \n技能列表：\n \n \n金币: \n店铺id："
 	case action == "战斗相关":
-		responseStr = "本文档为法系和物理系的对战系统注释\n"
-		responseStr += "术修，法师的攻击方式为技能攻击，优先默认释放1号主技能，后续按排序释放2，3号技能，绝技/奥义技每场战斗不限次数，消耗一定百分比蓝量之后下回合判定释放，需要消耗非常庞大的蓝量若蓝量不足则回到默认施法顺序，当蓝条不足以支撑任何技能释放的时候，将进行普通攻击\n"
+		responseStr = "本文档为法系和物理系的对战系统注释\n\n"
+		responseStr += "术修，法师的攻击方式为技能攻击，优先默认释放1号主技能，后续按排序释放2，3号技能，绝技/奥义技每场战斗不限次数，消耗一定百分比蓝量之后下回合判定释放，需要消耗非常庞大的蓝量若蓝量不足则回到默认施法顺序，当蓝条不足以支撑任何技能释放的时候，将进行普通攻击\n\n"
 		responseStr += "剑修，剑士的攻击方式为平a攻击，攻击成功的情况下生成一点能量，每受到10%最大生命值伤害也会生成一点能量，回合开始当能量足够释放技能的情况下1＞2＞3的顺序轮次进行释放，绝技/觉醒技每场战斗限一次，累积生成共计10点以上能量之后，回合开始必定释放，不消耗能量"
 	case action == "签到":
 		// 生成一个0到1之间的随机数
 		randomNum := rand.Float64()
 		// 初始化累积概率
 		accumulatedChance := 0.0
-
 		// 遍历签到奖励列表，累加概率直到随机数小于等于当前累积概率
 		var rewardGold int
 		for _, reward := range signinRewards {
@@ -182,10 +212,29 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 		} else {
 			responseStr = "签到失败，请稍后再试。"
 		}
+	case action == "任务":
+		var taskListStr string
+		for _, quest := range availableQuests {
+			taskListStr += fmt.Sprintf("\n任务ID: %d\n任务名称: %s\n任务描述: %s\n目标: %s\n奖励: %s\n",
+				quest.ID, quest.Title, quest.Description, quest.Objective, quest.Reward)
+		}
+		responseStr = "当前可接受任务列表:\n" + taskListStr
+		re := regexp.MustCompile(`^任务结算(\d+)$`)
+		if matches := re.FindStringSubmatch(action); matches != nil {
+			questID, err := strconv.Atoi(matches[1])
+			if err != nil || questID < 1 || questID > len(availableQuests) {
+				responseStr = "无效的任务ID，请检查后重新输入。"
+			} else {
+				// 假设任务结算成功，这里可以添加更复杂的逻辑，如验证玩家是否真的完成了任务
+				quest := availableQuests[questID-1]
+				responseStr = fmt.Sprintf("完成任务《%s》，获得奖励：%s", quest.Title, quest.Reward)
+			}
+		}
 	case utils.InArray(action, []string{"领取内测专属奖励", "内测奖励", "领取内测奖励"}):
 		responseStr = "恭喜道友获得由453411753内测群发出的内测专属奖励，内测专属称号：AU仙人，持有效果：幸运值+1"
 	case action == "闭关":
 		var cultivationLocation string
+
 		if s.a == "修仙界" {
 			cultivationLocation = "丹塔"
 		} else if s.a == "异世界" {
@@ -200,7 +249,6 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 
 	case action == "修炼":
 		// 随机选择修炼选项
-		rand.Seed(time.Now().UnixNano()) // 确保每次运行都有不同的随机结果
 		totalProbability := 0
 		for _, option := range cultivationOptions {
 			totalProbability += option.Probability
@@ -220,16 +268,6 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 			//理论上不应该到达这里，但作为保险措施，提供一个默认响应
 			responseStr = "修炼过程中发生未知错误，请稍后重试。"
 		}
-		//判定已经开始的，我先不动让墨寒来操作
-		//return operations.NewActionOK().WithPayload(responseStr)
-		//user, err := s.CreateOrGetUser(params.MemberID)
-		//if err != nil {
-		//	return operations.NewActionInternalServerError().WithPayload("Internal Server Error")
-		//}
-		//if user.XStatus {
-		//	responseStr = "你已经在修炼中"
-		//}
-		//responseStr = "已经开始修炼"
 
 	}
 
@@ -283,58 +321,93 @@ func generateMeridian() string {
 
 // 新增处理迷宫功能的函数
 func (s *Service) enterDungeon(params operations.ActionParams) middleware.Responder {
-	// 直接设定为第一层
-	floor := 1
-	// 计算本层怪物数量
-	monsterCount := 5 + (floor - 1)
+	currentFloor := 1 // 当前迷宫层数，初始为第一层
+	responseStr := ""
 
-	// 击杀怪物统计
-	killedMonsters := make(map[string]int)
-	for i := 0; i < monsterCount; i++ {
-		selectedMonster := selectMonsterBasedOnProbability(monsters)
-		killedMonsters[selectedMonster.Name]++
-	}
-
-	// 怪物掉落处理
-	drops := []string{}
-	for monsterName, count := range killedMonsters {
-		monster := findMonsterByName(monsters, monsterName)
-		if rand.Float64() <= monster.DropRate {
-			dropItem := "未知物品"
-			switch monster.Name {
-			case "哥布林战士":
-				dropItem = "装备1"
-			case "哥布林巫师":
-				dropItem = "道具1"
-			case "哥布林弓箭手":
-				if rand.Intn(2) == 0 {
-					dropItem = "道具1"
-				} else {
-					dropItem = "装备1"
-				}
-			case "哥布林头目":
-				dropItem = "稀有物品"
-			}
-			drops = append(drops, fmt.Sprintf("击杀%d只%s，获得%s", count, monster.Name, dropItem))
+	// 处理单层迷宫逻辑的函数
+	enterSingleFloor := func(currentFloor int) (string, bool) {
+		monsterCount := 5 + (currentFloor - 1)
+		killedMonsters := make(map[string]int)
+		for i := 0; i < monsterCount; i++ {
+			selectedMonster := selectMonsterBasedOnProbability(monsters)
+			killedMonsters[selectedMonster.Name]++
 		}
+
+		var uniqueDrops []string
+		for monsterName := range killedMonsters {
+			monster := findMonsterByName(monsters, monsterName)
+			if rand.Float64() <= monster.DropRate {
+				var dropItem string
+				switch monster.Name {
+				case "哥布林战士":
+					dropItem = "装备1"
+				case "哥布林巫师":
+					dropItem = "道具1"
+				case "哥布林弓箭手":
+					if rand.Intn(2) == 0 {
+						dropItem = "道具1"
+					} else {
+						dropItem = "装备1"
+					}
+				case "哥布林头目":
+					dropItem = "失落的人族圣女"
+				}
+				uniqueDrops = append(uniqueDrops, fmt.Sprintf("获得%s", dropItem))
+			}
+		}
+
+		// 特殊事件判定
+		eventOutcome := specialEvent()
+
+		// 去重并格式化掉落物品
+		dropSummary := removeDuplicates(uniqueDrops)
+
+		// 本层结算信息
+		floorResponse := fmt.Sprintf("- 在第%d层迷宫\n- 击杀了", currentFloor)
+		for monster, count := range killedMonsters {
+			floorResponse += fmt.Sprintf("%d只%s，", count, monster)
+		}
+		floorResponse = strings.TrimSuffix(floorResponse, ",") // 移除最后一个逗号
+
+		if dropSummary != "" {
+			floorResponse += fmt.Sprintf("\n- %s，", dropSummary)
+		}
+		floorResponse += eventOutcome
+
+		// 判断是否解锁下一层
+		continueToNext := strings.Contains(eventOutcome, "解锁下一层")
+		if continueToNext {
+			floorResponse += "继续探索\n"
+		}
+
+		return floorResponse, continueToNext
 	}
 
-	// 特殊事件判定
-	eventOutcome := specialEvent()
+	// 开始迷宫探索
+	for {
+		// 处理当前层
+		layerResponse, proceed := enterSingleFloor(currentFloor)
+		responseStr += layerResponse
 
-	// 结算信息
-	responseStr := fmt.Sprintf("在第%d层迷宫，您击杀了:", floor)
-	for monster, count := range killedMonsters {
-		responseStr += fmt.Sprintf("%d只%s，", count, monster)
+		// 检查是否继续探索
+		if !proceed {
+			break // 玩家选择不继续或达到结束条件
+		}
+		currentFloor++ // 升级到下一层
 	}
-	if len(drops) > 0 {
-		responseStr += "掉落物品：" + strings.Join(drops, "") + "，"
-	}
-	responseStr += eventOutcome
 
-	// 如果到下一关终点额外发送询问
-	if strings.Contains(eventOutcome, "解锁下一层") {
-		responseStr += "是否直接探索下一层？(是/否)"
-	}
 	return operations.NewActionOK().WithPayload(responseStr)
+}
+
+// 去重并格式化掉落物品的辅助函数
+func removeDuplicates(items []string) string {
+	dropMap := make(map[string]bool)
+	for _, item := range items {
+		dropMap[item] = true
+	}
+	var uniqueDrops []string
+	for item := range dropMap {
+		uniqueDrops = append(uniqueDrops, item)
+	}
+	return strings.Join(uniqueDrops, "，")
 }
