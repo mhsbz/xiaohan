@@ -7,6 +7,8 @@ import (
 	"github.com/mhsbz/xiaohan/api/gen/xiaohan/server/operations"
 	"github.com/mhsbz/xiaohan/internal/schemas"
 	"github.com/mhsbz/xiaohan/pkg/utils"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -18,6 +20,8 @@ type Service struct {
 	IDungeon     *DungeonService
 	IFight       *FightService
 	IDescription *DescriptionService
+	IDate        *DateService
+	IDask        *Daskservice
 }
 
 func NewService() *Service {
@@ -79,6 +83,20 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 		responseStr = s.IDescription.FightDescription()
 	case action == "签到":
 		responseStr = s.IDate.EnterDate()
+	case action == "任务":
+		responseStr = s.IDask.Dasks()
+		re := regexp.MustCompile(`^任务结算(\d+)$`)
+		if matches := re.FindStringSubmatch(action); matches != nil {
+			questID, err := strconv.Atoi(matches[1])
+			if err != nil || questID < 1 || questID > len(availableQuests) {
+				responseStr = "无效的任务ID，请检查后重新输入。"
+			} else {
+				// 假设任务结算成功，这里可以添加更复杂的逻辑，如验证玩家是否真的完成了任务
+				quest := availableQuests[questID-1]
+				responseStr = fmt.Sprintf("完成任务《%s》，获得奖励：%s", quest.Title, quest.Reward)
+			}
+		}
+
 	case utils.InArray(action, []string{"领取内测专属奖励", "内测奖励", "领取内测奖励"}):
 		responseStr = "恭喜道友获得由453411753内测群发出的内测专属奖励，内测专属称号：AU仙人，持有效果：幸运值+1"
 	case action == "闭关":
@@ -96,9 +114,9 @@ func (s *Service) Action(params operations.ActionParams) middleware.Responder {
 		responseStr = fmt.Sprintf("未选择闭关地点，已为您默认选择初始地区%s", cultivationLocation)
 	case action == "进入迷宫":
 		responseStr = s.IDungeon.EnterDungeon()
-
 	case action == "修炼":
 		responseStr = s.ITraining.Training()
+
 	}
 
 	return operations.NewActionOK().WithPayload(responseStr)
